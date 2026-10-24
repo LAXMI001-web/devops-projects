@@ -1,0 +1,23 @@
+pipeline {
+  agent none
+  stages {
+    stage('Compile') {
+      agent { label 'build' }
+      steps {
+        checkout scm
+        dir('project4-jenkins-distributed/maven-app') { sh 'mvn -B clean compile' }
+        echo "Compiled on ${env.NODE_NAME}"
+        stash name: 'src', includes: 'project4-jenkins-distributed/maven-app/**'
+      }
+    }
+    stage('Test') {
+      agent { label 'test' }
+      steps {
+        unstash 'src'
+        dir('project4-jenkins-distributed/maven-app') { sh 'mvn -B test' }
+        echo "Tested on ${env.NODE_NAME}"
+      }
+      post { always { junit '**/target/surefire-reports/*.xml' } }
+    }
+  }
+}

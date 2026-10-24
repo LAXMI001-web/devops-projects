@@ -1,0 +1,50 @@
+pipeline {
+  agent any
+  environment { IMAGE_NAME = 'myapp' }
+  stages {
+    stage('Debug: Environment Info') {
+      steps {
+        echo '===== DEBUG: Pipeline started ====='
+        echo "DEBUG: Job=${env.JOB_NAME} Build=${env.BUILD_NUMBER} Node=${env.NODE_NAME}"
+        echo "DEBUG: Workspace=${env.WORKSPACE}"
+        sh 'echo "DEBUG: user=$(whoami) dir=$(pwd)"'
+        sh 'docker --version && git --version && docker ps'
+      }
+    }
+    stage('Checkout') {
+      steps {
+        echo 'DEBUG: Checking out code'
+        checkout scm
+        sh 'ls -la'
+      }
+    }
+    stage('Build Image') {
+      steps {
+        dir('project1-jenkins-docker/sample-app') {
+          echo "DEBUG: Building ${IMAGE_NAME}:${BUILD_NUMBER}"
+          sh 'cat Dockerfile'
+          sh 'docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} .'
+        }
+        sh 'docker images | grep ${IMAGE_NAME}'
+      }
+    }
+    stage('Test') {
+      steps {
+        echo 'DEBUG: Running nginx config test in container'
+        sh 'docker run --rm ${IMAGE_NAME}:${BUILD_NUMBER} nginx -t'
+      }
+    }
+    stage('Deploy') {
+      steps {
+        sh 'docker rm -f myapp || true'
+        sh 'docker run -d --name myapp -p 9090:80 ${IMAGE_NAME}:${BUILD_NUMBER}'
+        sh 'sleep 3 && docker ps --filter name=myapp && docker logs myapp'
+      }
+    }
+  }
+  post {
+    success { echo 'DEBUG: SUCCESS. App live at http://localhost:9090' }
+    failure { echo 'DEBUG: FAILED. Check the red stage'; sh 'docker ps -a || true' }
+    always  { echo "DEBUG: Finished with status ${currentBuild.currentResult}" }
+  }
+}
