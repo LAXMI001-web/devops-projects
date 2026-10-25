@@ -1,0 +1,23 @@
+*   2eba92f (HEAD -> develop) Merge hotfix/1.0.1
+|\  
+* \   d5439b7 Merge release/1.0.0 back
+|\ \  
+| | | *   bc52366 (tag: v1.0.1, main) Hotfix 1.0.1
+| | | |\  
+| | | |/  
+| | |/|   
+| | * | e299311 Hotfix 1.0.1
+| | |/  
+| | *   1feb3e7 (tag: v1.0.0) Release 1.0.0
+| | |\  
+| | |/  
+| |/|   
+| * | 37cb254 Bump version to 1.0.0
+|/ /  
+* |   89bf442 Merge feature/login
+|\ \  
+| |/  
+|/|   
+| * 131a34b Add login feature
+|/  
+* 11e23be Initial commit
